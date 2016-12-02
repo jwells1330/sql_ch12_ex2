@@ -111,9 +111,8 @@ public class UserDB {
             ps = connection.prepareStatement(query);
             ps.setString(1, email);
             rs = ps.executeQuery();
-            User user = null;
+            User user = new User();
             if (rs.next()) {
-                user = new User();
                 user.setFirstName(rs.getString("FirstName"));
                 user.setLastName(rs.getString("LastName"));
                 user.setEmail(rs.getString("Email"));
@@ -131,6 +130,31 @@ public class UserDB {
     
     public static ArrayList<User> selectUsers() {
         // add code that returns an ArrayList<User> object of all users in the User table
-        return null;
+        ArrayList users = new ArrayList();
+        ConnectionPool pool = ConnectionPool.getInstance();
+        Connection connection = pool.getConnection();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String query = "SELECT * FROM user";
+        try {
+            ps = connection.prepareStatement(query);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setFirstName(rs.getString("FirstName"));
+                user.setLastName(rs.getString("LastName"));
+                user.setEmail(rs.getString("Email"));
+                users.add(user);
+            }
+            return users;
+        } catch (SQLException e) {
+            System.out.println(e);
+            return null;
+        } finally {
+            DBUtil.closeResultSet(rs);
+            DBUtil.closePreparedStatement(ps);
+            pool.freeConnection(connection);
+        }
     }    
 }
